@@ -83,17 +83,19 @@
              */
             open: function(referenceNodeType, referenceNodePath) {
                 this.source = '/' + referenceNodeType + '/' + referenceNodePath;
-                if(referenceNodeType == 'pages') {
-                    this.sourceData = this.$$('#pageforkop').getStoredValue(this.source);
-                } else {
+                if(referenceNodeType == 'templates') {
                     this.sourceData = {
                         template: referenceNodePath,
                         content: {}
                     }
+                } else {
+                    this.$$('#pageforkop').getStoredValue(this.source)
+                    .then((data) => {
+                        this.sourceData = data;
+                    });
                 }
                 this._openModal();
             }
-
         });
     </script>
 </dom-module>
