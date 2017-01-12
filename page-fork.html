@@ -1,0 +1,101 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../polymerfire/firebase-document.html">
+
+
+<dom-module id="page-fork">
+    <template>
+        <style>
+            .info > span{
+                border: 1px solid rgba(0,0,0,0.5);
+                border-radius: 5px;
+                background-color: rgba(0,0,0,0.1);
+                padding: 5px;
+            }
+            .select-01 {
+                width: 100px;
+            }
+            .select-01, .select-02 {
+                display: inline-block;
+            }
+            paper-dialog-scrollable {
+                margin: 20px 10px;
+                display: block;
+            }
+        </style>
+
+        <firebase-document
+            path="/locales"
+            data="{{locales}}">
+        </firebase-document>
+
+        <firebase-document id="pageforkop"></firebase-document>
+
+        <paper-dialog>
+            <h2>Enter the name for this new page.</h2>
+            <paper-dialog-scrollable>
+                <div class="info">
+                    The page will be forked from <span>[[source]]</span>
+                </div>
+                <div class="select-01">
+                    <paper-dropdown-menu label="Locale">
+                        <paper-listbox class="dropdown-content">
+                            <template is="dom-repeat" items="[[locales]]">
+                                <paper-item>{{item}}</paper-item>
+                            </template>
+                        </paper-listbox>
+                    </paper-dropdown-menu>
+                </div>
+                <div class="select-02">
+                    <paper-input label="Name of the page" value="{{pagename}}"></paper-input>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-click="_handleNodeFork">Accept</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+        Polymer({
+            is: 'page-fork',
+
+            _openModal: function() {
+                this.$$('paper-dialog').open();
+            },
+
+            _handleNodeFork: function() {
+                var data = this.sourceData;
+                this.sink = '/pages/' + this.$$('paper-dropdown-menu').selectedItemLabel + '/' + this.pagename;
+                console.log(this.sink);
+                this.$$('#pageforkop').setStoredValue(this.sink, this.sourceData);
+            },
+
+            /*
+             *  This is a public method which gets called by other elements in order
+             *  to open the paper-dialog box
+             *  @param referenceNodeType {String} fork from templates or pages
+             *  @param referenceNodePath {String} name of the already available node
+             */
+            open: function(referenceNodeType, referenceNodePath) {
+                this.source = '/' + referenceNodeType + '/' + referenceNodePath;
+                if(referenceNodeType == 'pages') {
+                    this.sourceData = this.$$('#pageforkop').getStoredValue(this.source);
+                } else {
+                    this.sourceData = {
+                        template: referenceNodePath,
+                        content: {}
+                    }
+                }
+                console.log(this.sourceData);
+                this._openModal();
+            }
+
+        });
+    </script>
+</dom-module>
